@@ -21,7 +21,7 @@ set.seed(1082021)
 #   beta = 1 - 0.8, #power 80% equals type II error (beta) of 0.2
 #   delta = 0.3
 # )
-# save(balancedSafeDesign, file="safe2x2DesignObject.Rdata")
+# save(balancedSafeDesign, file="safe2x2VignetteData/safe2x2DesignObject.Rdata")
 load("safe2x2VignetteData/safe2x2DesignObject.Rdata")
 
 ## ---- eval=FALSE--------------------------------------------------------------
@@ -60,16 +60,16 @@ safe.prop.test(ya = ya, yb = yb, designObj = balancedSafeDesign)
 #                       betaB2 = 0.18)
 # #set a seed for the simulations
 # set.seed(1082021)
-# sampleSizePerMinimalDifference <- simulateTwoProportions(list(standard = standardPrior), 
-#                                            alternativeRestriction = "none", 
-#                                            alpha = 0.05, 
-#                                            beta = 0.2, 
-#                                            na = 1, 
+# sampleSizePerMinimalDifference <- simulateTwoProportions(list(standard = standardPrior),
+#                                            alternativeRestriction = "none",
+#                                            alpha = 0.05,
+#                                            beta = 0.2,
+#                                            na = 1,
 #                                            nb = 1,
-#                                            deltamin = 0.3, 
+#                                            deltamin = 0.3,
 #                                            deltamax = 0.9
 #                                          )
-#save(sampleSizePerMinimalDifference, file = "safe2x2VignetteData/safe2x2SimObject.Rdata")
+# save(sampleSizePerMinimalDifference, file = "safe2x2VignetteData/safe2x2SimObject.Rdata")
 load("safe2x2VignetteData/safe2x2SimObject.Rdata")
 
 ## ---- eval = FALSE------------------------------------------------------------
@@ -134,20 +134,20 @@ print(unbalancedSafeDesign)
 ## ---- echo = FALSE------------------------------------------------------------
 # #make the plot voor standard parameter settings
 # standardPrior <- unbalancedSafeDesign[["betaPriorParameterValues"]]
-# uniformLikePrior <- list(betaA1 = 2, # pretend we "have seen" 2 success and 
+# uniformLikePrior <- list(betaA1 = 2, # pretend we "have seen" 2 success and
 #                       betaA2 = 2,# 2 failure in group A before starting
-#                       betaB1 = 1, # and 1 success and failure in group B 
+#                       betaB1 = 1, # and 1 success and failure in group B
 #                       betaB2 = 1)
 # #set a seed for the simulations
 # set.seed(1082021)
 # sampleSizePerMinimalDifference <- simulateTwoProportions(
-#    hyperparameterList = list(standard = standardPrior, uniform = uniformLikePrior), 
-#    alternativeRestriction = "none", 
-#    alpha = 0.05, 
-#    beta = 0.2, 
-#    na = 2, 
+#    hyperparameterList = list(standard = standardPrior, uniform = uniformLikePrior),
+#    alternativeRestriction = "none",
+#    alpha = 0.05,
+#    beta = 0.2,
+#    na = 2,
 #    nb = 1,
-#    deltamin = 0.3, 
+#    deltamin = 0.3,
 #    deltamax = 0.9
 #   )
 # save(sampleSizePerMinimalDifference, file = "safe2x2VignetteData/safe2x2UnbalancedSimObject.Rdata")
@@ -256,10 +256,10 @@ optionalStoppingResultTrueDifferenceNull[["powerOptioStop"]]
 
 ## ---- echo = FALSE------------------------------------------------------------
 # optionalStoppingWrongFisher <- simulateIncorrectStoppingTimesFisher(thetaA = 0.5,
-#                                      thetaB = 0.5, 
-#                                      alpha = 0.05, 
+#                                      thetaB = 0.5,
+#                                      alpha = 0.05,
 #                                      na = balancedSafeDesign[["nPlan"]][["na"]],
-#                                      nb = balancedSafeDesign[["nPlan"]][["nb"]], 
+#                                      nb = balancedSafeDesign[["nPlan"]][["nb"]],
 #                                      maxSimStoptime = balancedSafeDesign[["nPlan"]][["nBlocksPlan"]],
 #                                      M = 1e3,
 #                                      numberForSeed = 1082021)

@@ -46,7 +46,7 @@ set to \code{NULL} by default.}
 if a formula is provided, therefore set to \code{NULL} by default.}
 
 \item{pilot}{a logical indicating whether a pilot study is run. If \code{TRUE}, it is assumed that the number of
-samples is exactly as planned. The default null h0=1 is used, alpha=0.05, and alternative="two.sided" is used.
+samples is exactly as planned. The default null h0=1 is used, alpha=0.05, and alternative="twoSided" is used.
 To change these default values, please use \code{\link{designSafeLogrank}}.}
 
 \item{exact}{a logical indicating whether the exact safe logrank test needs to be performed based on
@@ -83,8 +83,6 @@ following components:
   \item{sumStats}{a list containing.the time of events, the progression of the risk sets and events.}
   \item{call}{the expression with which this function is called.}
 }
-
-
 }
 \description{
 A safe test to test whether there is a difference between two survival curves. This function
@@ -92,12 +90,12 @@ builds on the Mantel-Cox version of the logrank test.
 }
 \section{Functions}{
 \itemize{
-\item \code{safeLogrankTestStat}: Safe Logrank Test based on Summary Statistic Z
+\item \code{safeLogrankTestStat()}: Safe Logrank Test based on Summary Statistic Z
 All provided data (i.e., z-scores) are assumed to be centred on a hazard ratio = 1, thus, log(hr) = 0 ,
 and the proper (e.g., hypergeometric) scaling is applied to the data, so sigma = 1. The null hypothesis
 in the design object pertains to the population and is allowed to differ from log(theta) = 0.
-}}
 
+}}
 \examples{
 # Example taken from survival::survdiff
 
@@ -137,7 +135,7 @@ eValueGreater <- exp(cumsum(result$sumStats$logEValueGreater))
 # Less
 eValueLess <- exp(cumsum(result$sumStats$logEValueLess))
 
-# two.sided
+# twoSided
 eValueTwoSided <- 1/2*eValueGreater+1/2*eValueLess
 
 eValueTwoSided
