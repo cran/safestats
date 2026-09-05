@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Alexander Ly, Rosanne Turner, Udo Boehm, Rianne de Heide, Peter Grunwald" />
+
+
+<title>I. Testing: P-values, subjective Bayes factor, and e-variables</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">I. Testing: P-values, subjective Bayes
+factor, and e-variables</h1>
+<h4 class="author">Alexander Ly, Rosanne Turner, Udo Boehm, Rianne de
+Heide, Peter Grunwald</h4>
+
+
+
+<p>Using the two-sample z-test for comparing two means as a guiding
+example, we illustrate the following:</p>
+<ol style="list-style-type: decimal">
+<li><a href="#pValues">Sequential use of p-values over-inflates the type
+I error</a></li>
+<li><a href="#bf">Sequential use of Bayes factors based on subjectively
+chosen priors can also over-inflate the type I error</a></li>
+<li><a href="#eValues">Sequential use of a savi test/e-variable will
+<strong>not</strong> over-inflate the type I error</a></li>
+</ol>
+<p>The first point is well-known, but we believe it’s good to see actual
+examples of this as a wake-up call, as it showcase the severity of this
+over-inflation. The second point illustrates that not
+<strong>all</strong> Bayes factors have type I error control under
+optional stopping. That is, not all Bayes factors are safe/e-variables
+and not all Bayes factors can be used for sequential experiment set-ups
+with type I error control.</p>
+<p>The main point is that with e-variables type I error control is
+retained <em>regardless of the sample size</em>. In other words, we can
+safely monitor the e-value and stop the experiment (early) whenever this
+e-value provides compelling evidence for the presence over the absence
+of an effect. By stopping early fewer participants will be put at risk,
+in particular, those patients who are assigned to the control condition,
+when in reality the treatment condition obtains more effective results.
+Savi tests also allow for optional continuation, that is the extension
+of an experiment regardless of the motivation. For instance, if more
+funds become available, or if the evidence looks promising and the
+funding agency, a reviewer, or an editor urges the experimenter to
+collect more data.</p>
+<p>Importantly, for the savi tests presented here neither optional
+stopping nor continuation leads to the test exceeding the tolerable type
+I error <span class="math inline">\(\alpha\)</span>. As the results do
+not depend on the planned, current, or future sample sizes, savi tests
+allow for <em>anytime valid</em> inferences.</p>
+<p>For this demonstration we use functions from the safestats package
+and the following colours:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;safestats&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>freqColours <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;#E31A1CE6&quot;</span>, <span class="st">&quot;#FB9A9980&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>bayesColours <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;#B15928E6&quot;</span>, <span class="st">&quot;#FFFF9980&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>eColours <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;#1F78B4E6&quot;</span>, <span class="st">&quot;#A6CEE380&quot;</span>)</span></code></pre></div>
+<p>The next markdown document is concerned with power and the design of
+experiments.</p>
+<div id="the-two-sample-z-test" class="section level1">
+<h1>The two-sample z-test</h1>
+<p>The running example will be the two-sample z-test discussed before.
+Suppose a pre-university educational programme is developed that claims
+to increase IQ scores by 10 points. The null hypothesis is that this
+educational programme does not change the population average IQ score.
+To test this null hypothesis, n1 secondary school students are assigned
+to the treatment group, and n2 students are assigned to the control
+group. The null and alternative hypotheses are respectively given by</p>
+<p><span class="math display">\[\begin{align}
+\mathcal{H}_{0} : \mu_{1} = \mu_{2} \text{ and } \mathcal{H}_{1} :
+\mu_{1} \neq \mu_{2}
+\end{align}\]</span></p>
+<p>The IQ score of each secondary school student is assumed to be drawn
+from a normal distribution, thus,</p>
+<p><span class="math display">\[\begin{align}
+X_{1i} \overset{\text{iid}}{\sim} \mathcal{N} \left (\mu_{1}, \sigma^2
+\right ), \text{ and } X_{2i} \overset{\text{iid}}{\sim} \mathcal{N}
+\left (\mu_{2}, \sigma^2 \right ) .
+\end{align}\]</span></p>
+<p>For simplicity we take n1=n2=100. Data under the null hypothesis of
+no difference in IQ scores between the treatment and the control group
+can be generated as follows:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> n2 <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>muGlobal <span class="ot">&lt;-</span> <span class="dv">112</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  </span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>dataGroup1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n1, <span class="at">mean=</span>muGlobal, <span class="at">sd=</span>sigma)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>dataGroup2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n2, <span class="at">mean=</span>muGlobal, <span class="at">sd=</span>sigma)</span></code></pre></div>
+<p>Note that the data are indeed generated from the null as the
+difference between the two population means is zero. The variable
+muGlobal can take on any value under the null, and is referred to as a
+nuisance parameter. In this case both the null and the alternative
+hypothesis/model are composite.</p>
+</div>
+<div id="sequential-use-of-p-values-over-inflates-the-type-i-error" class="section level1">
+<h1>1. <a name="pValues">Sequential use of p-values over-inflates the
+type I error</a></h1>
+<p>For the p-value demonstration we use the <code>pValueZTest</code>
+function from the safestats package. The details provided here are only
+included for those particularly interested in its derivation. This
+subsection can be safely skipped, as the use of the
+<code>pValueZTest</code> function becomes clear in the next
+subsections.</p>
+<p>A p-value analysis relies on the sampling distribution of a test
+statistic. For the case at hand, the natural statistic of interest is
+the difference between the sample means. The sample mean <span class="math inline">\(\bar{X}_{1}\)</span> has sampling distribution</p>
+<p><span class="math display">\[\begin{align}
+\bar{X}_{1} \sim \mathcal{N} \left (\mu_{1}, \frac{\sigma^{2}}{n_{1}}
+\right ).
+\end{align}\]</span></p>
+<p>The sample mean <span class="math inline">\(\bar{X}_{2}\)</span> has
+an analogous sampling distribution, but with <span class="math inline">\(2\)</span> as subscript instead of <span class="math inline">\(1\)</span>. The difference between the two sample
+means has distribution</p>
+<p><span class="math display">\[\begin{align}
+\bar{X}_{1} - \bar{X}_{2} \sim \mathcal{N} \left (\mu_{1}- \mu_{2}, \big
+( \tfrac{1}{n_{1}} + \tfrac{1}{n_{2}} \big ) \sigma^{2} \right ).
+\end{align}\]</span></p>
+<p>Hence, we can define the z-statistic as the rescaled version</p>
+<p><span class="math display">\[\begin{align}
+Z:= \frac{ \sqrt{n}_{\text{eff}} ( \bar{X}_{1} - \bar{X}_{2})}{\sigma}
+\sim \mathcal{N} \left (\tfrac{ \sqrt{n}_{\text{eff}} (\mu_{1}-
+\mu_{2})}{\sigma}, 1 \right ).
+\end{align}\]</span></p>
+<p>where</p>
+<p><span class="math display">\[\begin{align}
+n_{\text{eff}} = \big ( \frac{1}{n_{1}} + \frac{1}{n_{2}} \big )^{-1} =
+\frac{n_{1} n_{2}}{n_{1} + n_{2}}
+\end{align}\]</span></p>
+<p>can be referred to as the effective sample size. Hence, under the
+null hypothesis <span class="math inline">\(\mu_{1} = \mu_{2}\)</span>,
+<span class="math inline">\(Z\)</span> has a standard normal
+distribution. Its p-value can thus be easily derived from the standard R
+function <code>pnorm</code>, which is effectively what the functions
+<code>pValueZTest</code> and <code>pValueFromZStat</code> do.</p>
+<div id="sequential-analysis" class="section level2">
+<h2>Sequential analysis</h2>
+<p>The sequential use of a p-value entails computing a p-value after
+each observation, and claiming an effect, as soon as the p-value dips
+below the threshold alpha, say, alpha=0.05. This procedure therefore
+allows for the possibility to stop an experiment early. The problem,
+however, is that this procedure is not safe, as it will lead to false
+rejections with more than 5% chance. This is well-known, but we will
+show this with a simulation. The algorithmic description of this
+sequential p-value analysis is as follows:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># # PSEUDO CODE</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># # </span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># #     THIS CODE DOES NOT RUN</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># # </span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># # Initiate</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># n &lt;- 1</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># pValue &lt;- 1</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># while (pValue &gt; alpha) {</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#   pValue &lt;- computePValueZTest(x=x[1:n], y=y[1:n])</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#   if (pValue &lt; alpha) {</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#     &quot;Reject the null&quot;</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#     stop()</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#   } else {</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#     &quot;Increase sample size and test again </span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#           at the start the start of the while loop&quot;</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#     n &lt;- n + 1</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#   }</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co"># }</span></span></code></pre></div>
+<div id="one-sample-path" class="section level3">
+<h3>One sample path</h3>
+<p>We demonstrate this procedure for a single data set of n1=n2=100
+samples, and we compute the p-value a 100 times, each time after an
+observation from each group has been completed.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>pValueVector <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;numeric&quot;</span>, <span class="at">length=</span>n1)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n1) {</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  pValueVector[i] <span class="ot">&lt;-</span> <span class="fu">pValueZTest</span>(<span class="at">x=</span>dataGroup1[<span class="dv">1</span><span class="sc">:</span>i],</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>                                 <span class="at">y=</span>dataGroup2[<span class="dv">1</span><span class="sc">:</span>i],</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                                 <span class="at">sigma=</span>sigma)<span class="sc">$</span>pValue</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>}</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>oldPar <span class="ot">&lt;-</span> <span class="fu">setSafeStatsPlotOptionsAndReturnOldOnes</span>();</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span>n1, pValueVector, <span class="at">type=</span><span class="st">&quot;l&quot;</span>, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">xlab=</span><span class="st">&quot;n&quot;</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>     <span class="at">ylab=</span><span class="st">&quot;p-value&quot;</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>     <span class="at">col=</span>freqColours[<span class="dv">1</span>])</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h=</span><span class="fl">0.05</span>, <span class="at">lty=</span><span class="dv">2</span>, <span class="at">lwd=</span><span class="dv">2</span>)</span></code></pre></div>
+<p>Using p &lt; alpha = 0.05 as a stopping rule and an indication of
+there being an effect leads to the experiment to be stopped early at the
+cost of making an incorrect decision, as the data are sampled under the
+null.</p>
+<p>This incorrect conclusion occurred for the specific data set we used,
+but it can be mathematical proven that this procedure will always yield
+a significant p-value under the null if we sample indefinitely. This is
+also known as <strong>sampling to a foregone conclusion</strong>.</p>
+</div>
+<div id="the-behaviour-of-the-sequential-p-value-procedure-under-multiplerepeated-use" class="section level3">
+<h3>The behaviour of the sequential p-value procedure under
+multiple/repeated use</h3>
+<p>The previous code worked for a specific data set/outcomes of a single
+experiment. Note that this 1 data set yielded 100 p-values. We now
+repeat the procedure, but for 1,000 data sets/experiments. The code
+below stores 1,000 times 100 p-values in the variable
+<code>allPValues</code>.</p>
+<p>We will see that far more than 50 out of these 1,000 data
+sets/repeated experiments will yield a “significant” result if we reject
+the null as soon as p &lt; alpha=0.05, despite the data being sampled
+under the null: Far more than what we would want for a test that should
+retain a type I error rate guarantee at level 0.05.</p>
+<p>The following code stores a 1,000 times 100 p-values:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>mIter <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>allData <span class="ot">&lt;-</span> <span class="fu">generateNormalData</span>(<span class="fu">c</span>(n1, n2), <span class="at">muGlobal=</span>muGlobal,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                              <span class="at">nSim=</span>mIter,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                              <span class="at">meanDiffTrue=</span><span class="dv">0</span>, <span class="at">seed=</span><span class="dv">1</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                              <span class="at">sigma=</span>sigma)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>allPValues <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow=</span>mIter, <span class="at">ncol=</span>n1)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># This indicates whether a simulation yielded a &quot;significant&quot; p-value</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>pValueUnderAlpha <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;integer&quot;</span>, <span class="at">length=</span>mIter)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co"># This indicates the first time an experiment yielded a &quot;significant&quot; p-value</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co"># Default is Inf, which indicates that the p-value didn&#39;t dip below alpha</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>firstPassageTime <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">Inf</span>, <span class="at">times=</span>mIter)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co"># Used to vectorise the computations for the the z-statistic</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>n1Vector <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n1</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>n2Vector <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n2</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>nEffVector <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">/</span>n1Vector<span class="sc">+</span><span class="dv">1</span><span class="sc">/</span>n2Vector)<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="cf">for</span> (sim <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>mIter) {</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  dataGroup1 <span class="ot">&lt;-</span> allData<span class="sc">$</span>dataGroup1[sim, ]</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>  dataGroup2 <span class="ot">&lt;-</span> allData<span class="sc">$</span>dataGroup2[sim, ]</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  </span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>  x1BarVector <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>n1Vector<span class="sc">*</span><span class="fu">cumsum</span>(dataGroup1)</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>  x2BarVector <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>n2Vector<span class="sc">*</span><span class="fu">cumsum</span>(dataGroup2)</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>  zVector <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(nEffVector)<span class="sc">*</span>(x1BarVector <span class="sc">-</span> x2BarVector)<span class="sc">/</span>sigma</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>  </span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n1) {</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>    currentPValue <span class="ot">&lt;-</span> <span class="fu">pValueFromZStat</span>(zVector[i])</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>    allPValues[sim, i] <span class="ot">&lt;-</span> currentPValue</span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>    </span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>    <span class="cf">if</span> (currentPValue <span class="sc">&lt;</span> alpha <span class="sc">&amp;&amp;</span> pValueUnderAlpha[sim]<span class="sc">!=</span><span class="dv">1</span>) {</span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>      pValueUnderAlpha[sim] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>      firstPassageTime[sim] <span class="ot">&lt;-</span> i</span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>    }</span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>  }</span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>}</span></code></pre></div>
+<p>To count the number of data sets/experiments that yielded a false
+negative result at observations 1 to 100, we run the following code:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>numberOfDippingExperimentsAtTimeN <span class="ot">&lt;-</span> <span class="fu">integer</span>(n1)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n1) {</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  numberOfDippingExperimentsAtTimeN[i] <span class="ot">&lt;-</span> <span class="fu">sum</span>(firstPassageTime <span class="sc">&lt;=</span> i)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>}</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>pValueFalseRejects <span class="ot">&lt;-</span>numberOfDippingExperimentsAtTimeN<span class="sc">/</span>mIter </span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>oldPar <span class="ot">&lt;-</span> <span class="fu">setSafeStatsPlotOptionsAndReturnOldOnes</span>();</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span>n1, <span class="dv">100</span><span class="sc">*</span>pValueFalseRejects, <span class="at">type=</span><span class="st">&quot;l&quot;</span>, <span class="at">xlab=</span><span class="st">&quot;n&quot;</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>     <span class="at">ylab=</span><span class="st">&quot;False positive rate (%)&quot;</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>     <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">col=</span>freqColours[<span class="dv">1</span>])</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">1</span>, n1), <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>), <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div>
+<p>The reason why the type I error over-inflates is due to classical
+p-value methods being developed for fixed designs. For these designs, we
+have to pre-experimentally set the sample size at which the data
+collection is both stopped and analysed. Deviating from this plan with
+multiple looks at the data results in an over-inflation of the type I
+error. This plot also shows that “all alpha is spent” upon the first
+look, where the procedure already yielded the tolerable type I error. In
+other words, the use of classical p-values confines researchers to
+analysing the data once, and only once.</p>
+</div>
+</div>
+</div>
+<div id="sequential-use-of-bayes-factors-based-on-subjectively-chosen-priors-can-also-over-inflate-the-type-i-error" class="section level1">
+<h1>2. <a name="bf">Sequential use of Bayes factors based on
+subjectively chosen priors can also over-inflate the type I
+error</a></h1>
+<p>For the subjective Bayes factor demonstration we use the
+<code>subjectiveBfZStat</code> function from the safestats package. This
+Bayes factor is based on normal priors on the parameters. In the
+alternative model there are two parameters, namely, <span class="math inline">\(\mu_{1}\)</span> and <span class="math inline">\(\mu_{2}\)</span>, whereas in the null model there
+is only one, namely, <span class="math inline">\(\mu_{0}\)</span>
+representing the common (but unknown) population mean shared by both
+groups.</p>
+<p>For computational simplicity these parameters are given normal
+priors, respectively, <span class="math inline">\(\mathcal{N}(a_{1},
+b_{1}^{2})\)</span>, <span class="math inline">\(\mathcal{N}(a_{2},
+b_{2}^{2})\)</span> in the alternative model, and <span class="math inline">\(\mathcal{N}(a_{0}, b_{0}^{2})\)</span> in the null
+model.</p>
+<p>Provided with the two sample means <span class="math inline">\(\bar{x}_{1}, \bar{x}_{2}\)</span>, the sample
+variances <span class="math inline">\(s_{1}^{2}, s_{2}^{2}\)</span>, and
+the six values of the hyper parameters <span class="math inline">\(a_{1}, b_{1}, a_{2}, b_{2}, a_{0}, b_{0}\)</span>
+the function <code>subjectiveBfZStat</code> outputs a subjective Bayes
+factor outcome in favour of the alternative over the null.</p>
+<p>One way to choose the 6 hyper parameters <span class="math inline">\(a_{1}, b_{1}, a_{2}, b_{2}, a_{0}, b_{0}\)</span>
+is by using data from a comparative study, as if we’re dealing with a
+replication attempt. Suppose that data are available of first-year
+Belgian psychology students in their first week of study. These data
+lead to an estimate of the population average IQ score of 107. Before we
+agree to implement the new educational programme that claims an IQ
+increase of 10 points in the Netherlands, we first test the null
+hypothesis of no effect. To do so with the subjective Bayes factor
+described above, the hyper parameters could then be set as follows:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Null hyper parameters</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>a0 <span class="ot">&lt;-</span> <span class="dv">107</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># Alternative model</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#  Hyper parameters in the control group</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>a2 <span class="ot">&lt;-</span> <span class="dv">107</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#  Hyper parameters in the treatment group</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>a1 <span class="ot">&lt;-</span> <span class="dv">117</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="dv">4</span></span></code></pre></div>
+<p>The prior standard deviation of the treatment condition is set higher
+to model our uncertainty about the new educational programme compared to
+the status quo.</p>
+<div id="sequential-analysis-1" class="section level2">
+<h2>Sequential analysis</h2>
+<p>A Bayes factor outcome bf10=8 is interpreted as the data being 8
+times more likely under the alternative model compared to the null
+model. A bf10 larger than 30 is sometimes perceived as strong evidence
+for the alternative over the null.</p>
+<p>Hence, a sequential use of the subjective Bayes factor entails
+computing a Bayes factor after each observation, and claiming an effect,
+as soon as the Bayes factor bf10 in favour of the alternative over the
+null crosses the evidence threshold of 30. We show that this procedure
+is not safe in general, at it leads to false rejections with more than
+5% chance. The algorithmic description of a sequential subjective Bayes
+factor analysis is as follows:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># # PSEUDO CODE</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># # </span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># #     THIS CODE DOES NOT RUN</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># # </span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co"># # Initiate</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># n &lt;- 1</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co"># bf10 &lt;- 1</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co"># while (bf10 &lt; 30) {</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#   bf10 &lt;- computeBfZTest(x=x[1:n], y=y[1:n])</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#   if (bf10 &gt; 30) {</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#     &quot;Reject the null&quot;</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#     stop()</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#   } else {</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#     &quot;Increase sample size and test again </span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#           at the start of the while loop&quot;</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#     n &lt;- n + 1</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#   }</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co"># }</span></span></code></pre></div>
+<div id="one-sample-path-1" class="section level3">
+<h3>One sample path</h3>
+<p>We demonstrate this procedure for a single data set of n1=n2=100
+samples, and we monitor the subjective Bayes factor 100 times, after an
+observation of each group.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Single sample path data set as in the p-value example</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>dataGroup1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n1, <span class="at">mean=</span>muGlobal, <span class="at">sd=</span>sigma)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>dataGroup2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n2, <span class="at">mean=</span>muGlobal, <span class="at">sd=</span>sigma)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>bfVector <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;numeric&quot;</span>, <span class="at">length=</span>n1)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n1) {</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  x1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dataGroup1[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  s21 <span class="ot">&lt;-</span> <span class="fu">var</span>(dataGroup1[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  </span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  x2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dataGroup2[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  s22 <span class="ot">&lt;-</span> <span class="fu">var</span>(dataGroup2[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  </span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  bfVector[i] <span class="ot">&lt;-</span> <span class="fu">subjectiveBfZStat</span>(<span class="at">x1=</span>x1, <span class="at">s21=</span>s21, <span class="at">n1=</span>i, </span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>                                   <span class="at">x2=</span>x2, <span class="at">s22=</span>s22, <span class="at">n2=</span>i, </span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>                                   <span class="at">sigma=</span>sigma,</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>                                   <span class="at">a1=</span>a1, <span class="at">b1=</span>b1, </span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>                                   <span class="at">a2=</span>a2, <span class="at">b2=</span>b2, </span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>                                   <span class="at">a0=</span>a0, <span class="at">b0=</span>b0)</span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>}</span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a>oldPar <span class="ot">&lt;-</span> <span class="fu">setSafeStatsPlotOptionsAndReturnOldOnes</span>();</span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span>n1, bfVector, <span class="at">type=</span><span class="st">&quot;l&quot;</span>, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">xlab=</span><span class="st">&quot;n&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;BF10&quot;</span>,</span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a>     <span class="at">col=</span>bayesColours[<span class="dv">1</span>])</span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">1</span>, n1), <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">30</span>), <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">3</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">1</span>, n1), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span>alpha, <span class="dv">1</span><span class="sc">/</span>alpha), <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div>
+<p>This Bayes factor sample path exceeds both evidence thresholds of 20
+(1/alpha) and 30 (“strong evidence”). We will see that this procedure
+also yields a type I error larger than alpha.</p>
+</div>
+<div id="the-behaviour-of-the-subjective-bayes-factor-procedure-under-multiplerepeated-use" class="section level3">
+<h3>The behaviour of the subjective Bayes factor procedure under
+multiple/repeated use</h3>
+<p>The previous code worked for a specific data set/outcomes of a single
+experiment. Note that this 1 data set yielded 100 subjective Bayes
+factor outcomes. We now repeat the procedure, but over 1,000 data
+sets/experiments. And the code below stores 1,000 times 100 Bayes factor
+outcomes in the variable <code>allBfValues</code>.</p>
+<p>We will see that far more than 50 out of these 1,000 data
+sets/repeated experiments will yield a “significant” result if we reject
+the null if bf10 &gt; 30, despite the data being sampled under the null.
+To prepare ourselves with the comparison with the e-value procedure, we
+will also track the number of times we reject the null whenever bf10
+&gt; 20=1/alpha, which corresponds to alpha=0.05.</p>
+<p>The following code stores the the 1,000 times 100 Bayes factor
+values:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>mIter <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>allData <span class="ot">&lt;-</span> <span class="fu">generateNormalData</span>(<span class="fu">c</span>(n1, n2), <span class="at">muGlobal=</span>muGlobal,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                              <span class="at">nSim=</span>mIter,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>                              <span class="at">meanDiffTrue=</span><span class="dv">0</span>, <span class="at">seed=</span><span class="dv">1</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>                              <span class="at">sigma=</span>sigma)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>allBfValues <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow=</span>mIter, <span class="at">ncol=</span>n1)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co"># This indicates whether a simulation yielded a &quot;significant&quot; Bayes factor values</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>bfValueOver20 <span class="ot">&lt;-</span> bfValueOver30 <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;integer&quot;</span>, <span class="at">length=</span>mIter)</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co"># This indicates the first time an experiment yielded a &quot;significant&quot; Bayes factor</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co"># Default is Inf, which indicates that the bf didn&#39;t cross 1/alpha=20, or 30 respectively </span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>firstPassageTime20 <span class="ot">&lt;-</span> firstPassageTime30 <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">Inf</span>, <span class="at">times=</span>mIter)</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="cf">for</span> (sim <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>mIter) {</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  dataGroup1 <span class="ot">&lt;-</span> allData<span class="sc">$</span>dataGroup1[sim, ]</span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>  dataGroup2 <span class="ot">&lt;-</span> allData<span class="sc">$</span>dataGroup2[sim, ]</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>  </span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n1) {</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>    x1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dataGroup1[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>    s21 <span class="ot">&lt;-</span> <span class="fu">var</span>(dataGroup1[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>    </span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a>    x2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(dataGroup2[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a>    s22 <span class="ot">&lt;-</span> <span class="fu">var</span>(dataGroup2[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>    </span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a>    currentBf10 <span class="ot">&lt;-</span> <span class="fu">subjectiveBfZStat</span>(<span class="at">x1=</span>x1, <span class="at">s21=</span>s21, <span class="at">n1=</span>i, </span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a>                                     <span class="at">x2=</span>x2, <span class="at">s22=</span>s22, <span class="at">n2=</span>i, </span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a>                                     <span class="at">sigma=</span>sigma,</span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a>                                     <span class="at">a1=</span>a1, <span class="at">b1=</span>b1, </span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a>                                     <span class="at">a2=</span>a2, <span class="at">b2=</span>b2, </span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a>                                     <span class="at">a0=</span>a0, <span class="at">b0=</span>b0)</span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a>    </span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a>    allBfValues[sim, i] <span class="ot">&lt;-</span> currentBf10</span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a>    </span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a>    <span class="cf">if</span> (currentBf10 <span class="sc">&gt;</span> <span class="dv">30</span> <span class="sc">&amp;&amp;</span> bfValueOver30[sim]<span class="sc">!=</span><span class="dv">1</span>) {</span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a>      bfValueOver30[sim] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a>      firstPassageTime30[sim] <span class="ot">&lt;-</span> i</span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a>    }</span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a>    </span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a>    <span class="co"># Prepare for the comparison with the e-value procedure</span></span>
+<span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a>    <span class="cf">if</span> (currentBf10 <span class="sc">&gt;</span> <span class="dv">1</span><span class="sc">/</span>alpha <span class="sc">&amp;&amp;</span> bfValueOver20[sim]<span class="sc">!=</span><span class="dv">1</span>) {</span>
+<span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a>      bfValueOver20[sim] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a>      firstPassageTime20[sim] <span class="ot">&lt;-</span> i</span>
+<span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a>    }</span>
+<span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a>  }</span>
+<span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a>}</span></code></pre></div>
+<p>To count the number of data sets/experiments that yielded a false
+negative result at observations 1 to 100, we run the following code:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>numberOfCrossingExperimentsAtTimeN20 <span class="ot">&lt;-</span> numberOfCrossingExperimentsAtTimeN30 <span class="ot">&lt;-</span> <span class="fu">integer</span>(n1)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n1) {</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  numberOfCrossingExperimentsAtTimeN30[i] <span class="ot">&lt;-</span> <span class="fu">sum</span>(firstPassageTime30 <span class="sc">&lt;=</span> i)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>    numberOfCrossingExperimentsAtTimeN20[i] <span class="ot">&lt;-</span> <span class="fu">sum</span>(firstPassageTime20 <span class="sc">&lt;=</span> i)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>}</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>subjectiveBfValueFalseRejects30 <span class="ot">&lt;-</span>numberOfCrossingExperimentsAtTimeN30<span class="sc">/</span>mIter </span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>subjectiveBfValueFalseRejects <span class="ot">&lt;-</span>numberOfCrossingExperimentsAtTimeN20<span class="sc">/</span>mIter </span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>oldPar <span class="ot">&lt;-</span> <span class="fu">setSafeStatsPlotOptionsAndReturnOldOnes</span>();</span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span>n1, <span class="dv">100</span><span class="sc">*</span>subjectiveBfValueFalseRejects, <span class="at">type=</span><span class="st">&quot;l&quot;</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">&quot;n&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;False positive rate (%)&quot;</span>, </span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>     <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">col=</span>bayesColours[<span class="dv">1</span>], <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">20</span>))</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="fu">lines</span>(<span class="dv">1</span><span class="sc">:</span>n1, <span class="dv">100</span><span class="sc">*</span>subjectiveBfValueFalseRejects30, <span class="at">lwd=</span><span class="dv">2</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>      <span class="at">col=</span>bayesColours[<span class="dv">1</span>], <span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">1</span>, n1), <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>), <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div>
+<p>The dashed brown curve corresponds to rejecting the null as soon as
+bf10 &gt; 30, whereas the full brown curve corresponds to bf10 &gt;
+1/alpha=20. Regardless of the threshold for the Bayes factor, the type I
+error is much higher than 5%.</p>
+<p>The following code allows you to explore the sample path where the
+subjective Bayes factor leads to a false negative result</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>failedSimIndeces <span class="ot">&lt;-</span> <span class="fu">which</span>(bfValueOver20<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co"># Take an arbitrary index where it fails</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>someIndex <span class="ot">&lt;-</span> failedSimIndeces[<span class="dv">3</span>]</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>oldPar <span class="ot">&lt;-</span> <span class="fu">setSafeStatsPlotOptionsAndReturnOldOnes</span>();</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span>n1, allBfValues[someIndex, ], <span class="at">type=</span><span class="st">&quot;l&quot;</span>, <span class="at">lwd=</span><span class="dv">2</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">&quot;n&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;BF10&quot;</span>, <span class="at">col=</span>bayesColours[<span class="dv">1</span>])</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">1</span>, n1), <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span>alpha, <span class="dv">1</span><span class="sc">/</span>alpha), <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div>
+<p>The main message is that if type I error control for Bayes factors is
+desirable, then the priors need to be selected with care. One of the
+reasons why this subjective Bayes factor led to poor type I error
+performance is due to its sensitivity to the underlying value of the
+nuisance parameter muGlobal, that is, the true baseline population mean.
+If the hyperparameter <span class="math inline">\(a_{0}\)</span> equals
+the true baseline population mean the type I error would remain below
+5%. In practice, we cannot assume that we know muGlobal exactly, nor can
+we ensure no baseline shifts. Note that this remark is only concerned
+with one of the six parameters, and that we can over-inflate the type I
+error by playing with the other five hyper parameters as well.</p>
+</div>
+</div>
+</div>
+<div id="sequential-use-of-a-savi-teste-variable-will-not-over-inflate-the-type-i-error" class="section level1">
+<h1>3. <a name="eValues">Sequential use of a savi test/e-variable will
+<strong>not</strong> over-inflate the type I error</a></h1>
+<p>For the e-variable demonstration we rely on the
+<code>saviZTest</code> function from the safestats package.</p>
+<p>To run <code>saviZTest</code> a design object needs to be created.
+For the problem at hand we provided the design object with a minimal
+clinically relevant effect size, say, a mean difference of 10 (the
+claimed increase in IQ score). The following code creates such a design
+object.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>designObj <span class="ot">&lt;-</span> <span class="fu">designSaviZ</span>(<span class="at">meanDiffMin=</span><span class="dv">10</span>,</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                         <span class="at">testType=</span><span class="st">&quot;twoSample&quot;</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>                         <span class="at">sigma=</span>sigma)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>designObj</span></code></pre></div>
+<div id="sequential-analysis-2" class="section level2">
+<h2>Sequential analysis</h2>
+<p>The sequential use of e-variables entails computing an e-value after
+each observation, and claiming an effect, as soon as the e-value in
+favour of the alternative over the null is above the evidence threshold
+of 1/alpha, say, 20 when alpha=0.05. This procedure is safe, as it will
+<strong>never</strong> lead to a false rejection rate of more than 5%.
+The algorithmic description of the sequential e-value procedure is as
+follows:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># # PSEUDO CODE</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co"># # </span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co"># #     THIS CODE DOES NOT RUN</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># # </span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co"># # Initiate</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co"># n &lt;- 1</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># eValue &lt;- 1</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co"># while (eValue &lt; 1/alpha) {</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#   eValue &lt;- saviZTest(x=x[1:n], y=y[1:n],</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#                       designObj=designObj)</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co">#   if (eValue &gt; 1/alpha) {</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co">#     &quot;Reject the null&quot;</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co">#     stop()</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="co">#   } else {</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co">#     &quot;Increase sample size and test again </span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co">#           at the start of the while loop&quot;</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#     n &lt;- n + 1</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="co">#   }</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="co"># }</span></span></code></pre></div>
+<div id="one-sample-path-2" class="section level3">
+<h3>One sample path</h3>
+<p>We demonstrate this procedure for a single data set of n1=n2=100
+samples, and we monitor the e-variable a 100 times, after an observation
+of each group.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Single sample path data set as in the p-value example</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>dataGroup1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n1, <span class="at">mean=</span>muGlobal, <span class="at">sd=</span>sigma)</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>dataGroup2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n2, <span class="at">mean=</span>muGlobal, <span class="at">sd=</span>sigma)</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">saviZTest</span>(dataGroup1, dataGroup2[<span class="dv">1</span><span class="sc">:</span>i],</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>                    <span class="at">designObj=</span>designObj)</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="fu">plot</span>(result)</span></code></pre></div>
+<p>This sample path does not exceed the evidence threshold of 20, and
+fewer than 5% of the experiments will, even if we increase the sample
+size indefinitely.</p>
+</div>
+<div id="the-behaviour-of-the-e-variable-procedure-under-multiplerepeated-use" class="section level3">
+<h3>The behaviour of the e-variable procedure under multiple/repeated
+use</h3>
+<p>The previous code worked for a specific data set/outcomes of a single
+experiment. Note that this 1 data set yielded 100 e-values. We now
+repeat the procedure, but over 1,000 data sets/experiments. The code
+below stores 1,000 times 100 e-values in the variable
+<code>allEValues</code>.</p>
+<p>We will see that <strong>fewer</strong> than 50 out of these 1,000
+repeated experiments/data sets generated under the null will yield a
+false negative result, if we reject the null as soon as eValue &gt;=
+20.</p>
+<p>The following code stores 1,000 times 100 e-values:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>mIter <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>allData <span class="ot">&lt;-</span> <span class="fu">generateNormalData</span>(<span class="fu">c</span>(n1, n2),</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>                              <span class="at">muGlobal=</span>muGlobal,</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>                              <span class="at">nSim=</span>mIter,</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>                              <span class="at">meanDiffTrue=</span><span class="dv">0</span>, <span class="at">seed=</span><span class="dv">1</span>, <span class="at">sigma=</span>sigma)</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>allEValues <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow=</span>mIter, <span class="at">ncol=</span>n1)</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co"># This indicates whether a simulation yielded e &gt; 1/alpha</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>eValueOver <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;integer&quot;</span>, <span class="at">length=</span>mIter)</span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co"># This indicates the first time an experiment yielded e &gt; 1/alpha</span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co"># Default is Inf, which indicates that the e didn&#39;t cross 1/alpha</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a>firstPassageTime <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">Inf</span>, <span class="at">times=</span>mIter)</span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co"># Used to vectorise the computations for the the z-statistic</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a>n1Vector <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n1</span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a>n2Vector <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n2</span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a>nEffVector <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">/</span>n1Vector<span class="sc">+</span><span class="dv">1</span><span class="sc">/</span>n2Vector)<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="cf">for</span> (sim <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>mIter) {</span>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a>  dataGroup1 <span class="ot">&lt;-</span> allData<span class="sc">$</span>dataGroup1[sim, ]</span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a>  dataGroup2 <span class="ot">&lt;-</span> allData<span class="sc">$</span>dataGroup2[sim, ]</span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a>  </span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a>  x1BarVector <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>n1Vector<span class="sc">*</span><span class="fu">cumsum</span>(dataGroup1)</span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a>  x2BarVector <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>n2Vector<span class="sc">*</span><span class="fu">cumsum</span>(dataGroup2)</span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a>  zVector <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(nEffVector)<span class="sc">*</span>(x1BarVector <span class="sc">-</span> x2BarVector)<span class="sc">/</span>sigma</span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a>  </span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n1) {</span>
+<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a>    currentEValue <span class="ot">&lt;-</span> <span class="fu">saviZTestStat</span>(zVector[i], </span>
+<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a>                                   <span class="at">parameter=</span>designObj<span class="sc">$</span>parameter, </span>
+<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a>                                   <span class="at">n1=</span>n1Vector[i], <span class="at">n2=</span>n2Vector[i], </span>
+<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a>                                   <span class="at">sigma=</span>sigma,</span>
+<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a>                                   <span class="at">eType=</span>designObj<span class="sc">$</span>eType)<span class="sc">$</span>eValue</span>
+<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a>    </span>
+<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a>    allEValues[sim, i] <span class="ot">&lt;-</span> currentEValue</span>
+<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a>    </span>
+<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a>    <span class="cf">if</span> (currentEValue <span class="sc">&gt;</span> <span class="dv">1</span><span class="sc">/</span>alpha <span class="sc">&amp;&amp;</span> eValueOver[sim]<span class="sc">!=</span><span class="dv">1</span>) {</span>
+<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a>      eValueOver[sim] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a>      firstPassageTime[sim] <span class="ot">&lt;-</span> i</span>
+<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a>    }</span>
+<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a>  }</span>
+<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a>}</span></code></pre></div>
+<p>To count the number of data sets/experiments that yielded a false
+negative result at observations 1 to 100, we run the following code:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>numberOfCrossingExperimentsAtTimeN <span class="ot">&lt;-</span> <span class="fu">integer</span>(n1)</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n1) {</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  numberOfCrossingExperimentsAtTimeN[i] <span class="ot">&lt;-</span> <span class="fu">sum</span>(firstPassageTime <span class="sc">&lt;=</span> i)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>}</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>eValueFalseRejects <span class="ot">&lt;-</span> numberOfCrossingExperimentsAtTimeN<span class="sc">/</span>mIter </span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>oldPar <span class="ot">&lt;-</span> <span class="fu">setSafeStatsPlotOptionsAndReturnOldOnes</span>();</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span>n1, <span class="dv">100</span><span class="sc">*</span>eValueFalseRejects, <span class="at">type=</span><span class="st">&quot;l&quot;</span>, </span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">&quot;n&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;False positive rate (%)&quot;</span>, <span class="at">lwd=</span><span class="dv">2</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>     <span class="at">col=</span>eColours[<span class="dv">1</span>], <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>))</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">1</span>, n1), <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>), <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">2</span>)</span></code></pre></div>
+<p>Hence, after n1=n2=100 observations, i.e. looks at the data, we
+falsely reject 36 out of the 1,000 times the null (3.6%). This is still
+below the tolerable alpha level of 5%.</p>
+<p>We would like to highlight two points. Firstly, the type I error
+control that e-values provide is independent of <em>any</em> maximum
+sample size. If we increase it to n1=n2=200, we get 2 additional false
+rejections resulting in a total of 38 out of 1,000 false rejections
+(3.8%) still below the 5%. One might wonder whether the chance of a
+false rejection will <strong>ever</strong> cross the tolerable 5% by
+simply further increasing the sample sizes. In a very general framework,
+Grunwald, de Heide and Koolen (2019) showed that this will not occur,
+even if we sample indefinitely under the null.</p>
+<p>Secondly, type I error control holds for any (hyper) parameter gMom
+that was set by design object. The next document provides some insights
+in how gMom was set.</p>
+</div>
+</div>
+</div>
+<div id="concluding-remarks" class="section level1">
+<h1>Concluding remarks</h1>
+<p>The following plot summarises the false rejections rates of the three
+procedures after n1=n2=100 observations/looks: In red the sequential
+p-value procedure resulting in a type I error of 38.4%, in brown the
+subjective Bayes factor procedure resulting in a type I error of 17.7%,
+and in blue the e-value procedure resulting in a type I error of
+3.6%:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>oldPar <span class="ot">&lt;-</span> <span class="fu">setSafeStatsPlotOptionsAndReturnOldOnes</span>();</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span>n1, <span class="dv">100</span><span class="sc">*</span>pValueFalseRejects, <span class="at">type=</span><span class="st">&quot;l&quot;</span>, <span class="at">xlab=</span><span class="st">&quot;n&quot;</span>, </span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>     <span class="at">ylab=</span><span class="st">&quot;False positive rate (%)&quot;</span>, </span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>     <span class="at">bty=</span><span class="st">&quot;n&quot;</span>, <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">40</span>), <span class="at">col=</span>freqColours[<span class="dv">1</span>])</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">c</span>(<span class="dv">1</span>, n1), <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>), <span class="at">lwd=</span><span class="dv">2</span>, <span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="fu">lines</span>(<span class="dv">1</span><span class="sc">:</span>n1, <span class="dv">100</span><span class="sc">*</span>subjectiveBfValueFalseRejects,</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>      <span class="at">col=</span>bayesColours[<span class="dv">1</span>], <span class="at">lwd=</span><span class="dv">2</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="fu">lines</span>(<span class="dv">1</span><span class="sc">:</span>n1, <span class="dv">100</span><span class="sc">*</span>eValueFalseRejects, <span class="at">col=</span>eColours[<span class="dv">1</span>], </span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>      <span class="at">lwd=</span><span class="dv">2</span>)</span></code></pre></div>
+<p>By simulating under the null, we showed that the sequential use of
+classical p-values and a subjectively derived Bayes factor can lead to
+early stopping at the high cost of drawing incorrect conclusions.</p>
+<!-- In other words, with these two procedures we cannot adapt to the information acquired during the study without increasing the risk of making a false discovery, as these methods extract unreliable information.  -->
+<p>In the next document we show that the e-value procedure is not only
+safe to optional stopping, but also powerful, by simulating under the
+alternative.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
