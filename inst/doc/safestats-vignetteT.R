@@ -26,56 +26,103 @@ power <- 0.8
 deltaMin <- 12/(sqrt(2)*15)
 sigma <- 15
 
-## ----echo = FALSE-------------------------------------------------------------
-load("safeVignetteData/saviTDesignObj.RData")
-
 ## ----eval=FALSE---------------------------------------------------------------
 # designObj <- designSaviT(deltaMin=deltaMin, alpha=alpha,
 #                          power=power, sigma=sigma,
 #                          alternative="greater",
 #                          testType="paired", seed=1, pb=FALSE)
-
-## -----------------------------------------------------------------------------
-designObj
+# designObj
+# #>
+# #>  Savi Paired Sample T-Test Design
+# #>
+# #>               n1Plan±2se, n2Plan±2se = 36±2.147258, 36±2.147258
+# #>               n1Mean±2se, n2Mean±2se = 22±0.6510288, 22±0.6510288
+# #> minimal standardised mean difference = 0.5656854
+# #>                          alternative = greater
+# #>                                power = 0.8
+# #>                      e-variable type = mom
+# #>                      parameter: gMom = 0.16
+# #>                                alpha = 0.05
+# #>       Reject H_0: e-value >= 1/alpha = 20
+# #>
+# #> Timestamp: 2020-03-27 18:28:18 CEST
+# #>
+# #> Note: If it is only possible to look at the data once, then n1Plan = 44 and n2Plan = 44.
 
 ## ----eval = FALSE-------------------------------------------------------------
 # designObj2 <- designSaviT(deltaMin=deltaMin, alpha=alpha,
 #                           nPlan=c(30, 30), sigma=sigma,
 #                           alternative="greater",
 #                           testType="paired", seed=1, pb=FALSE)
+# designObj2
+# #>
+# #>  Savi Paired Sample T-Test Design
+# #>
+# #>                       n1Plan, n2Plan = 30, 30
+# #> minimal standardised mean difference = 0.5656854
+# #>                          alternative = greater
+# #>                            power±2se = 0.719±0.0283044
+# #>                      e-variable type = mom
+# #>                      parameter: gMom = 0.16
+# #>                                alpha = 0.05
+# #>       Reject H_0: e-value >= 1/alpha = 20
+# #>              log(implied target)±2se = 3.882818±0.1586015
+# #>
+# #> Timestamp: 2020-03-27 03:14:16 CEST
 
-## ----echo = FALSE-------------------------------------------------------------
-load("safeVignetteData/saviTDesignObj2.RData")
+## ----eval = FALSE-------------------------------------------------------------
+# # Recall:
+# # alpha <- 0.05
+# # power <- 0.8
+# designObj3 <- designSaviT(nPlan=c(50, 50),
+#                           alpha=alpha, power=power,
+#                           sigma=sigma,
+#                           alternative="greater",
+#                           testType="paired")
+# designObj3
+# #> 	Savi Paired Sample T-Test Design
+# #>
+# #>                       n1Plan, n2Plan = 50, 50
+# #> minimal standardised mean difference = 0.5245391
+# #>                          alternative = greater
+# #>                      e-variable type = mom
+# #>                      parameter: gMom = 0.1375707
+# #>                                alpha = 0.05
+# #>       Reject H_0: e-value >= 1/alpha = 20
+# #>
+# #> Timestamp: 2022-03-27 16:18:03 CEST
+# #>
+# #> Note: The reported deltaMin is based on the batch analysis.
 
-## -----------------------------------------------------------------------------
-designObj2
+## ----eval=FALSE---------------------------------------------------------------
+# set.seed(1)
+# preData <- rnorm(n=designObj$nPlan[1], mean=120, sd=15)
+# postData <- rnorm(n=designObj$nPlan[2], mean=120, sd=15)
+# # Thus, deltaTrue=0
+# res <- saviTTest(x=preData, y=postData,
+#                  designObj=designObj, paired=TRUE)
+# res
+# #> 	Savi Paired Sample T-Test
+# #>
+# #> data:  preData and postData. n1 = 36, n2 = 36
+# #> estimates: mean of the differences = -2.5799
+# #> 95 percent confidence sequence:
+# #>  -12.791299   7.631511
+# #>
+# #> test: t = -0.78363, gMom = 0.16, type = mom
+# #> e-value = 0.020195 >= 1/alpha = 20 : FALSE
+# #>
+# #> alternative hypothesis: true difference in means ('x' minus 'y') is greater than #> 0
+# #>
+# #> design: the test was designed with alpha = 0.05
+# #> for experiments with n1Plan = 36, n2Plan = 36
+# #> for minimal relevant standardised mean difference = 0.56569 (greater)
+# plot(res)
+# plot(res, wantConfSeqPlot=TRUE)
 
-## ----eval = TRUE--------------------------------------------------------------
-# Recall:
-# alpha <- 0.05
-# power <- 0.8
-designObj3 <- designSaviT(nPlan=c(50, 50), 
-                          alpha=alpha, power=power,
-                          sigma=sigma,
-                          alternative="greater",
-                          testType="paired")
-designObj3
-
-## -----------------------------------------------------------------------------
-set.seed(1)
-preData <- rnorm(n=designObj$nPlan[1], mean=120, sd=15)
-postData <- rnorm(n=designObj$nPlan[2], mean=120, sd=15)
-# Thus, deltaTrue=0
-saviTTest(x=preData, y=postData, 
-          designObj=designObj, paired=TRUE)
-
-## -----------------------------------------------------------------------------
-savi.t.test(x=preData, y=postData, 
-            designObj=designObj, paired=TRUE)
-
-## ----echo=FALSE---------------------------------------------------------------
-nSim <- 1000
-load("safeVignetteData/eValuesTSimple.RData")
+## ----eval=FALSE---------------------------------------------------------------
+# savi.t.test(x=preData, y=postData,
+#             designObj=designObj, paired=TRUE)
 
 ## ----eval=FALSE---------------------------------------------------------------
 # # alpha <- 0.05
@@ -88,20 +135,22 @@ load("safeVignetteData/eValuesTSimple.RData")
 #   postData <- rnorm(n=designObj$nPlan[2], mean=120,
 #                     sd=15)
 #   saviTTest(x=preData, y=postData,
-#             designObj=designObj, paired=TRUE)$eValue}
+#             designObj=designObj,
+#             paired=TRUE, sequential=FALSE)$eValue}
 # )
-
-## -----------------------------------------------------------------------------
-mean(eValues >= 20)
-mean(eValues >= 20) <= alpha
+# 
+# mean(eValues >= 20)
+# #> 0.003
+# mean(eValues >= 20) <= alpha
+# #> TRUE
 
 ## ----label=zMatrix------------------------------------------------------------
 nSim <- 1000
 muGlobal <- 120
-n1 <- designObj$nPlan[1]
+n1 <- 36 #designObj$nPlan[1]
 
 nullData <- generateNormalData(
-  designObj$nPlan, muGlobal=muGlobal,
+  c(n1, n1), muGlobal=muGlobal,
   nSim=nSim, deltaTrue=0, seed=1,
   sigma=sigma)
 
@@ -138,6 +187,7 @@ tMatrix[, 1] <- 0
 ## ----label=pValuesFprCalculation----------------------------------------------
 # Here we store all the p-values across the 
 # number of simulations (nSim) and time (n1)
+nSim <- 1000
 allPValues <- matrix(nrow=nSim, ncol=n1)
 
 # Whenever this vector has a 1 it indicates that the simulate data 
@@ -179,10 +229,6 @@ pValueFalseRejects <- numberOfDippingExperimentsAtTimeN/nSim
 #      ylab="Type I error (%)", ylim=c(0, 25),
 #      lwd=2, col=freqColours[1])
 # lines(c(1, n1), c(5, 5), lwd=2, lty=2)
-
-## ----echo=FALSE---------------------------------------------------------------
-load("safeVignetteData/eValueFalseRejectsTSimple.RData")
-load("safeVignetteData/eValueFalseRejectsT.RData")
 
 ## ----eval=FALSE---------------------------------------------------------------
 # # Here we store all the e-values across the
@@ -231,8 +277,7 @@ load("safeVignetteData/eValueFalseRejectsT.RData")
 # }
 # 
 # eValueFalseRejects <- trackCrossing/nSim
-
-## ----eval=FALSE---------------------------------------------------------------
+# 
 # oldPar <- setSafeStatsPlotOptionsAndReturnOldOnes();
 # plot(1:n1, 100*eValueFalseRejects, type="l",
 #      xlab="n", ylab="Type I error (%)", lwd=2,
@@ -248,9 +293,6 @@ load("safeVignetteData/eValueFalseRejectsT.RData")
 #      col=eColours[1])
 # lines(c(1, n1), c(5, 5), lwd=2, lty=2)
 
-## ----echo = FALSE-------------------------------------------------------------
-load("safeVignetteData/simDeltaTrueIsDeltaMin.RData")
-
 ## ----eval = FALSE-------------------------------------------------------------
 # simDeltaTrueIsDeltaMin <-
 #   sampleStoppingTimesSaviT(
@@ -258,11 +300,11 @@ load("safeVignetteData/simDeltaTrueIsDeltaMin.RData")
 #     testType="paired", sigma=sigma,
 #     nMax=designObj$nPlan, seed=1,
 #     parameter=designObj$parameter,nSim=nSim)
-
-## -----------------------------------------------------------------------------
-mean(
-  simDeltaTrueIsDeltaMin$eValuesStopped >=
-    20)
+# 
+# mean(
+#   simDeltaTrueIsDeltaMin$eValuesStopped >=
+#     20)
+# #> 0.801
 
 ## ----eval=FALSE---------------------------------------------------------------
 # stoppingTimes <- simDeltaTrueIsDeltaMin$stoppingTimes
@@ -301,9 +343,6 @@ mean(
 #      col=eColoursAlt[1], ylim=c(0, 80))
 # lines(c(1, n1), c(80, 80), lwd=2, lty=2)
 
-## ----echo = FALSE-------------------------------------------------------------
-load("safeVignetteData/simDeltaTrueLargerDeltaMin.RData")
-
 ## ----eval = FALSE-------------------------------------------------------------
 # simDeltaTrueLargerDeltaMin <-
 #   sampleStoppingTimesSaviT(
@@ -311,11 +350,11 @@ load("safeVignetteData/simDeltaTrueLargerDeltaMin.RData")
 #     testType="paired", sigma=sigma,
 #     nMax=designObj$nPlan, seed=1,
 #     parameter=designObj$parameter,nSim=nSim)
-
-## -----------------------------------------------------------------------------
-mean(
-  simDeltaTrueLargerDeltaMin$eValuesStopped >=
-    20)
+# 
+# sum(
+#   simDeltaTrueLargerDeltaMin$eValuesStopped >=
+#     20)
+# #> 935
 
 ## ----eval=FALSE---------------------------------------------------------------
 # stoppingTimes <-
@@ -373,7 +412,7 @@ mean(pValuesBatch1 < alpha)
 
 ## -----------------------------------------------------------------------------
 nullData2 <- generateNormalData(
-  designObj$nPlan, muGlobal=muGlobal,
+  c(n1, n1), muGlobal=muGlobal,
   nSim=nSim, deltaTrue=0, seed=2,
   sigma=sigma)
 
@@ -486,12 +525,7 @@ mean(pValuesBatch2[notRejectedIndeces] < alpha)
 # 
 # eValueFalseRejects2 <-
 #   trackCrossingOptioCont/nSim
-
-## ----echo = FALSE-------------------------------------------------------------
-load("safeVignetteData/eValueFalseRejects2T.RData")
-# load("safeVignetteData/allEValuesTLarge.RData")
-
-## ----eval=FALSE---------------------------------------------------------------
+# 
 # oldPar <- setSafeStatsPlotOptionsAndReturnOldOnes();
 # plot(1:(10*n1), 100*eValueFalseRejects2, type="l",
 #      xlab="n", ylab="Type I error (%)", lwd=2,
@@ -593,12 +627,7 @@ load("safeVignetteData/eValueFalseRejects2T.RData")
 # 
 # eValueCorrectRejects <-
 #   trackCrossingOptioCont/nSim
-
-## ----echo = FALSE-------------------------------------------------------------
-# load("safeVignetteData/allEValuesAltT.RData")
-load("safeVignetteData/eValueCorrectRejectsT.RData")
-
-## ----eval=FALSE---------------------------------------------------------------
+# 
 # oldPar <- setSafeStatsPlotOptionsAndReturnOldOnes();
 # plot(1:(10*n1), 100*eValueCorrectRejects, type="l",
 #      xlab="n", ylab="Correct rejections (%)", lwd=2,
@@ -643,24 +672,16 @@ load("safeVignetteData/eValueCorrectRejectsT.RData")
 #   trackCrossingOld=trackCrossing,
 #   firstPassageTimeOld=firstPassageTimeE,
 #   eStoppedOld=eStopped, seed=2)
-
-## ----echo = FALSE-------------------------------------------------------------
-#load("safeVignetteData/allEValuesAltT.RData")
-load("safeVignetteData/eValueCorrectRejectsT.RData")
-load("safeVignetteData/rep2.RData")
-load("safeVignetteData/rep3.RData")
-load("safeVignetteData/rep4.RData")
-# load("safeVignetteData/repAlt.RData")
-
-## ----eval=FALSE---------------------------------------------------------------
+# 
 # oldPar <- setSafeStatsPlotOptionsAndReturnOldOnes();
 # plot(1:(3*n1), 100*rep2$trackCrossing/nSim, type="l",
 #      xlab="n", ylab="Type I error (%)", lwd=2,
 #      col=eColours[1], ylim=c(0, 5))
 # lines(c(1, 3*n1), c(5, 5), lwd=2, lty=2)
 
-## -----------------------------------------------------------------------------
-rep2$extraRejections
+## ----eval=FALSE---------------------------------------------------------------
+# rep2$extraRejections
+# #> 8
 
 ## ----eval=FALSE---------------------------------------------------------------
 # rep3 <- selectivelyContinueZOrTTestData(
@@ -670,16 +691,16 @@ rep2$extraRejections
 #   trackCrossingOld=rep2$trackCrossing,
 #   firstPassageTimeOld=rep2$firstPassageTime,
 #   eStoppedOld=rep2$eStopped, seed=3)
-
-## ----eval=FALSE---------------------------------------------------------------
+# 
 # oldPar <- setSafeStatsPlotOptionsAndReturnOldOnes();
 # plot(1:(length(rep3$trackCrossing)), 100*rep3$trackCrossing/nSim, type="l",
 #      xlab="n", ylab="Type I error (%)", lwd=2,
 #      col=eColours[1], ylim=c(0, 5))
 # lines(c(1, length(rep3$trackCrossing)), c(5, 5), lwd=2, lty=2)
 
-## -----------------------------------------------------------------------------
-rep3$extraRejections
+## ----eval=FALSE---------------------------------------------------------------
+# rep3$extraRejections
+# #> 0
 
 ## ----eval=FALSE---------------------------------------------------------------
 # rep4 <- selectivelyContinueZOrTTestData(
@@ -689,16 +710,16 @@ rep3$extraRejections
 #   trackCrossingOld=rep3$trackCrossing,
 #   firstPassageTimeOld=rep3$firstPassageTime,
 #   eStoppedOld=rep3$eStopped, seed=4)
-
-## ----eval=FALSE---------------------------------------------------------------
+# 
 # oldPar <- setSafeStatsPlotOptionsAndReturnOldOnes();
 # plot(1:(length(rep4$trackCrossing)), 100*rep4$trackCrossing/nSim, type="l",
 #      xlab="n", ylab="Type I error (%)", lwd=2,
 #      col=eColours[1], ylim=c(0, 5))
 # lines(c(1, length(rep4$trackCrossing)), c(5, 5), lwd=2, lty=2)
 
-## -----------------------------------------------------------------------------
-rep4$extraRejections
+## ----eval=FALSE---------------------------------------------------------------
+# rep4$extraRejections
+# #> 0
 
 ## ----eval=FALSE---------------------------------------------------------------
 # totalN <- length(rep4$trackCrossing)
@@ -739,8 +760,7 @@ rep4$extraRejections
 #   trackCrossingOld=trackCrossingAltEqual,
 #   firstPassageTimeOld=firstPassageTimeAltEqual,
 #   eStoppedOld=simDeltaTrueIsDeltaMin$eValuesStopped, seed=6)
-
-## ----eval=FALSE---------------------------------------------------------------
+# 
 # oldPar <- setSafeStatsPlotOptionsAndReturnOldOnes();
 # plot(1:(length(repAlt$trackCrossing)), 100*repAlt$trackCrossing/nSim, type="l",
 #      xlab="n", ylab="Correct rejections (%)", lwd=2,
